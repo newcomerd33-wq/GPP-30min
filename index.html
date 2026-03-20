@@ -1028,7 +1028,7 @@ function initVoice() {
   };
 
   recognition.onend = () => {
-    if (voiceEnabled) {
+    if (voiceEnabled && document.visibilityState === 'visible') {
       try { recognition.start(); } catch(e) {}
     }
   };
@@ -1409,7 +1409,10 @@ async function requestWakeLock() {
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && isRunning) requestWakeLock();
+  if (document.visibilityState === 'hidden') stopVoice();
 });
+window.addEventListener('pagehide', stopVoice);
+window.addEventListener('beforeunload', stopVoice);
 const origStart = startWorkout;
 startWorkout = function() {
   requestWakeLock();
