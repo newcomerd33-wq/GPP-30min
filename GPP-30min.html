@@ -1028,8 +1028,12 @@ function initVoice() {
   };
 
   recognition.onend = () => {
-    if (voiceEnabled && document.visibilityState === 'visible') {
-      try { recognition.start(); } catch(e) {}
+    if (voiceEnabled && document.visibilityState === 'visible' && isRunning) {
+      setTimeout(() => {
+        if (voiceEnabled && document.visibilityState === 'visible') {
+          try { recognition.start(); } catch(e) {}
+        }
+      }, 300);
     }
   };
 
@@ -1037,8 +1041,6 @@ function initVoice() {
     if (event.error === 'not-allowed') {
       voiceEnabled = false;
       updateControls();
-    } else if (voiceEnabled) {
-      try { recognition.start(); } catch(e) {}
     }
   };
 }
@@ -1066,7 +1068,9 @@ function toggleVoice() {
 }
 
 function stopVoice() {
-  if (recognition) { try { recognition.stop(); } catch(e) {} }
+  voiceEnabled = false;
+  if (recognition) { try { recognition.abort(); } catch(e) {} }
+  updateControls();
 }
 
 // Format seconds as M:SS
