@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>30 Min GPP</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  :root {
+    --bg: #08080d;
+    --card: #111118;
+    --card-border: #1e1e2a;
+    --text: #e8e8ef;
+    --text-muted: #6b6b80;
+    --strength: #22c55e;
+    --strength-bg: rgba(34,197,94,0.08);
+    --cardio: #3b82f6;
+    --cardio-bg: rgba(59,130,246,0.08);
+    --rest: #f59e0b;
+    --rest-bg: rgba(245,158,11,0.08);
+    --transition: #8b5cf6;
+    --high: #ef4444;
+    --med: #f59e0b;
+    --low: #22c55e;
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Day Selector */
+  .day-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    padding: 4px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .day-btn {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--text-muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    min-width: 52px;
+  }
+
+  .day-btn.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  .day-btn .intensity-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin: 4px auto 0;
+  }
+
+  /* Day Header */
+  .day-header {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+  }
+
+  .day-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .day-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .intensity-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+  }
+
+  .intensity-high { background: rgba(239,68,68,0.15); color: var(--high); }
+  .intensity-med { background: rgba(245,158,11,0.15); color: var(--med); }
+  .intensity-low { background: rgba(34,197,94,0.15); color: var(--low); }
+
+  /* Timer Display */
+  .timer-section {
+    text-align: center;
+    padding: 20px 0;
+    flex-shrink: 0;
+  }
+
+  .main-timer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+
+  .main-timer.strength { color: var(--strength); }
+  .main-timer.cardio { color: var(--cardio); }
+  .main-timer.rest { color: var(--rest); }
+  .main-timer.transition { color: var(--transition); }
+
+  .total-timer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--card);
+    border-radius: 2px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s linear, background-color 0.3s;
+    width: 0%;
+  }
+
+  /* Current Exercise */
+  .exercise-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    margin-bottom: 12px;
+    min-height: 160px;
+    transition: border-color 0.3s;
+  }
+
+  .exercise-display.strength-border { border-color: rgba(34,197,94,0.3); }
+  .exercise-display.cardio-border { border-color: rgba(59,130,246,0.3); }
+  .exercise-display.rest-border { border-color: rgba(245,158,11,0.3); }
+
+  .exercise-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+    padding: 3px 12px;
+    border-radius: 20px;
+  }
+
+  .exercise-label.strength { background: var(--strength-bg); color: var(--strength); }
+  .exercise-label.cardio { background: var(--cardio-bg); color: var(--cardio); }
+  .exercise-label.rest { background: var(--rest-bg); color: var(--rest); }
+
+  .exercise-name {
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .exercise-detail {
+    font-size: 16px;
+    color: var(--text-muted);
+    text-align: center;
+    font-weight: 400;
+  }
+
+  .exercise-round {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* Up Next */
+  .up-next {
+    padding: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .up-next-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .up-next-name {
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .up-next-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0 16px;
+    flex-shrink: 0;
+  }
+
+  .ctrl-btn {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    background: var(--card);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .ctrl-btn:active { transform: scale(0.97); }
+
+  .ctrl-btn.primary {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+    flex: 2;
+  }
+
+  .ctrl-btn.primary:active { background: #ccc; }
+
+  .ctrl-btn svg { width: 20px; height: 20px; }
+
+  /* Workout List (pre-start) */
+  .workout-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 16px;
+  }
+
+  .block-header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 12px 0 6px;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 8px;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .step-item.is-rest {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .step-dot.strength { background: var(--strength); }
+  .step-dot.cardio { background: var(--cardio); }
+  .step-dot.rest { background: var(--rest); }
+
+  .step-info { flex: 1; }
+  .step-name { font-weight: 600; }
+  .step-detail { font-size: 12px; color: var(--text-muted); }
+
+  .step-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* States */
+  .hidden { display: none !important; }
+
+  /* Completion */
+  .complete-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .complete-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+
+  .complete-title {
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .complete-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 2px; }
+
+  /* Pulse animation for active step */
+  @keyframes pulse-border {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+
+  .exercise-display.active-pulse {
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+
+  /* Countdown flash */
+  @keyframes countdown-flash {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .timer-flash {
+    animation: countdown-flash 0.3s ease;
+  }
+
+  /* Transition Pause */
+  .exercise-display.transition-pause {
+    border-color: rgba(139, 92, 246, 0.4);
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.06) 0%, var(--card) 100%);
+  }
+
+  .setup-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--transition);
+    background: rgba(139, 92, 246, 0.1);
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+
+  /* Voice Control */
+  .voice-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .voice-btn svg { width: 20px; height: 20px; }
+
+  .voice-btn.active {
+    border-color: var(--text);
+    color: var(--bg);
+    background: var(--text);
+  }
+
+  .voice-btn.active.listening {
+    animation: pulse-mic 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-mic {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 232, 239, 0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(232, 232, 239, 0); }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- Day Selector -->
+  <div class="day-selector" id="daySelector"></div>
+
+  <!-- Day Header -->
+  <div class="day-header" id="dayHeader">
+    <div class="day-title" id="dayTitle"></div>
+    <div class="day-subtitle" id="daySubtitle"></div>
+    <div class="intensity-badge" id="intensityBadge"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls" id="controls">
+    <button class="ctrl-btn primary" id="startBtn" onclick="startWorkout()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      Start
+    </button>
+  </div>
+
+  <!-- Pre-Start: Workout Preview -->
+  <div class="workout-list" id="workoutList"></div>
+
+  <!-- Active Workout -->
+  <div class="hidden" id="activeWorkout">
+    <div class="timer-section">
+      <div class="main-timer" id="mainTimer">0:00</div>
+      <div class="total-timer" id="totalTimer">Total: 30:00</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="exercise-display" id="exerciseDisplay">
+      <div class="exercise-label" id="exerciseLabel"></div>
+      <div class="exercise-name" id="exerciseName"></div>
+      <div class="exercise-detail" id="exerciseDetail"></div>
+      <div class="exercise-round" id="exerciseRound"></div>
+    </div>
+    <div class="up-next" id="upNext">
+      <div class="up-next-label">UP NEXT</div>
+      <div class="up-next-name" id="upNextName"></div>
+      <div class="up-next-time" id="upNextTime"></div>
+    </div>
+  </div>
+
+  <!-- Complete -->
+  <div class="complete-screen hidden" id="completeScreen">
+    <div class="complete-icon">&#9889;</div>
+    <div class="complete-title">Done.</div>
+    <div class="complete-subtitle" id="completeSubtitle">30 minutes in the books.</div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// WORKOUT DATA — 7 DAYS
+// ============================================
+// Each step: {cat: "strength"|"cardio"|"rest", name, detail, duration, block?, round?}
+// Total per day MUST = 1800s (30 min)
+
+const DAYS = [];
+
+// Helper to build straight sets
+function straightSets(name, detail, sets, workSec, restSec, block) {
+  const steps = [];
+  for (let i = 0; i < sets; i++) {
+    steps.push({cat: "strength", name, detail, duration: workSec, block, round: `Set ${i+1}/${sets}`});
+    if (i < sets - 1) steps.push({cat: "rest", name: "Rest", detail: "", duration: restSec, block});
+  }
+  return steps;
+}
+
+// Helper for supersets
+function superset(exercises, rounds, restBetween, block) {
+  const steps = [];
+  for (let r = 0; r < rounds; r++) {
+    exercises.forEach((ex, i) => {
+      steps.push({cat: "strength", name: ex.name, detail: ex.detail, duration: ex.dur, block, round: `Round ${r+1}/${rounds}`});
+      if (i < exercises.length - 1) {
+        steps.push({cat: "rest", name: "Transition", detail: "Next exercise", duration: 8, block});
+      }
+    });
+    if (r < rounds - 1) steps.push({cat: "rest", name: "Rest", detail: "", duration: restBetween, block});
+  }
+  return steps;
+}
+
+// Helper for circuit
+function circuit(exercises, rounds, restBetweenEx, restBetweenRounds, block) {
+  const steps = [];
+  for (let r = 0; r < rounds; r++) {
+    exercises.forEach((ex, i) => {
+      steps.push({cat: ex.cat || "strength", name: ex.name, detail: ex.detail, duration: ex.dur, block, round: `Round ${r+1}/${rounds}`});
+      if (i < exercises.length - 1 && restBetweenEx > 0) {
+        steps.push({cat: "rest", name: "Transition", detail: "Next exercise", duration: restBetweenEx, block});
+      }
+    });
+    if (r < rounds - 1 && restBetweenRounds > 0) steps.push({cat: "rest", name: "Rest", detail: "", duration: restBetweenRounds, block});
+  }
+  return steps;
+}
+
+function cardioBlock(name, detail, duration, block) {
+  return [{cat: "cardio", name, detail, duration, block}];
+}
+
+function intervals(workName, workDetail, workDur, restName, restDetail, restDur, rounds, block) {
+  const steps = [];
+  for (let i = 0; i < rounds; i++) {
+    steps.push({cat: "cardio", name: workName, detail: workDetail, duration: workDur, block, round: `Interval ${i+1}/${rounds}`});
+    if (i < rounds - 1 || restDur > 0) {
+      if (i < rounds - 1) steps.push({cat: "rest", name: restName || "Rest", detail: restDetail || "", duration: restDur, block});
+    }
+  }
+  return steps;
+}
+
+function transition(dur) {
+  return [{cat: "rest", name: "Transition", detail: "Set up next block", duration: dur}];
+}
+
+// ============================================
+// DAY 1: HIGH — Squat + Push
+// Quads, glutes, chest, triceps, anterior chain
+// ============================================
+(function(){
+  let steps = [];
+  
+  // Strength A: Back Squat — 4x5 @ RPE 8
+  steps.push(...straightSets("Barbell Back Squat", "5 reps @ RPE 8", 4, 50, 70, "Heavy Squat"));
+  // 4*50 + 3*70 = 200+210 = 410s
+  
+  steps.push(...transition(10));
+  
+  // Cardio A: Incline Walk
+  steps.push(...cardioBlock("Walking Pad", "12% incline · 3.5 mph", 200, "Incline Walk"));
+  
+  steps.push(...transition(10));
+  
+  // Strength B: DB Floor Press + Band Pull-Apart superset
+  steps.push(...superset([
+    {name: "DB Floor Press", detail: "8 reps @ RPE 7", dur: 40},
+    {name: "Band Pull-Apart", detail: "15 reps", dur: 25}
+  ], 3, 50, "Push + Pull"));
+  // 3*(40+8+25) + 2*50 = 219+100 = 319s
+  
+  steps.push(...transition(10));
+  
+  // Cardio B: Jump Rope Intervals
+  steps.push(...intervals("Jump Rope", "Fast pace", 30, "Active Rest", "Shake it out", 20, 5, "Rope Intervals"));
+  // 5*30 + 4*20 = 150+80 = 230s
+  
+  steps.push(...transition(10));
+  
+  // Strength C: KB Goblet Squat + Push-Up circuit
+  steps.push(...circuit([
+    {name: "KB Goblet Squat", detail: "10 reps @ RPE 7", dur: 40},
+    {name: "Push-Up", detail: "12 reps @ RPE 7", dur: 35}
+  ], 3, 8, 40, "Squat + Push Circuit"));
+  // 3*(40+8+35) + 2*40 = 249+80 = 329s
+  
+  steps.push(...transition(10));
+  
+  // Cardio C: Finisher Walk — duration adjusts to fill 1800
+  let used = steps.reduce((s,x) => s + x.duration, 0);
+  steps.push(...cardioBlock("Walking Pad", "12% incline · 3.8 mph — finish strong", 1800 - used, "Finisher"));
+  
+  DAYS.push({
+    name: "Day 1",
+    title: "Squat + Push",
+    subtitle: "Quads · Chest · Triceps · Glutes",
+    intensity: "high",
+    steps
+  });
+})();
+
+// ============================================
+// DAY 2: MEDIUM — Hinge + Pull
+// Hamstrings, glutes, back, biceps, posterior chain
+// ============================================
+(function(){
+  let steps = [];
+  
+  // Strength A: Barbell RDL — 3x8 @ RPE 7
+  steps.push(...straightSets("Barbell RDL", "8 reps @ RPE 7", 3, 45, 60, "Romanian Deadlift"));
+  // 3*45 + 2*60 = 135+120 = 255s
+  
+  steps.push(...transition(10));
+  
+  // Cardio A: Stair Stepper
+  steps.push(...cardioBlock("Stair Stepper", "Moderate pace · steady", 200, "Steady Climb"));
+  
+  steps.push(...transition(10));
+  
+  // Strength B: Cable Row + Reverse Curl superset
+  steps.push(...superset([
+    {name: "Cable Row", detail: "10 reps @ RPE 7", dur: 40},
+    {name: "Cable Reverse Curl", detail: "12 reps @ RPE 7", dur: 30}
+  ], 3, 45, "Row + Forearm"));
+  // 3*(40+8+30) + 2*45 = 234+90 = 324s
+  
+  steps.push(...transition(10));
+  
+  // Cardio B: Walking Pad Intervals
+  steps.push(...intervals("Walking Pad", "12% incline · 3.8 mph", 40, "Walking Pad", "0% incline · 2.5 mph", 20, 5, "Incline Intervals"));
+  // 5*40 + 4*20 = 200+80 = 280s
+  
+  steps.push(...transition(10));
+  
+  // Strength C: KB Swing + Leg Curl circuit
+  steps.push(...circuit([
+    {name: "KB Swing", detail: "15 reps @ RPE 7", dur: 35},
+    {name: "Leg Curl Machine", detail: "12 reps @ RPE 7", dur: 40}
+  ], 3, 8, 40, "Hinge + Curl"));
+  // 3*(35+8+40) + 2*40 = 249+80 = 329s
+  
+  steps.push(...transition(10));
+  
+  let used = steps.reduce((s,x) => s + x.duration, 0);
+  steps.push(...cardioBlock("Walking Pad", "12% incline · 3.0 mph — cool down", 1800 - used, "Cool Down Walk"));
+  
+  DAYS.push({
+    name: "Day 2",
+    title: "Hinge + Pull",
+    subtitle: "Hamstrings · Back · Biceps · Glutes",
+    intensity: "med",
+    steps
+  });
+})();
+
+// ============================================
+// DAY 3: LOW — Movement Quality + Core
+// Full body light, mobility, anti-rotation, stability
+// ============================================
+(function(){
+  let steps = [];
+  
+  // Strength A: Goblet Squat + Tricep Extension
+  steps.push(...superset([
+    {name: "KB Goblet Squat", detail: "10 reps @ RPE 6 · slow tempo", dur: 50},
+    {name: "Cable OH Tricep Extension", detail: "10 reps @ RPE 6", dur: 40}
+  ], 3, 35, "Squat + Tricep"));
+  // 3*(50+8+40) + 2*35 = 294+70 = 364s
+  
+  steps.push(...transition(10));
+  
+  // Cardio A: Walking Pad Easy
+  steps.push(...cardioBlock("Walking Pad", "8% incline · 3.0 mph", 210, "Easy Walk"));
+  
+  steps.push(...transition(10));
+  
+  // Strength B: Core Circuit
+  steps.push(...circuit([
+    {name: "Pallof Press", detail: "10/side @ RPE 6", dur: 40},
+    {name: "Dead Bug", detail: "8/side · slow", dur: 40},
+    {name: "DB Calf Raise (Slant Board)", detail: "15 reps @ RPE 6", dur: 40}
+  ], 3, 5, 30, "Core + Calf"));
+  // 3*(40+5+40+5+40) + 2*30 = 390+60 = 450s
+  
+  steps.push(...transition(10));
+  
+  // Cardio B: Jump Rope Easy
+  steps.push(...cardioBlock("Jump Rope", "Easy singles · find rhythm", 180, "Easy Rope"));
+  
+  steps.push(...transition(10));
+  
+  // Strength C: Slant Board + Roman Chair
+  steps.push(...superset([
+    {name: "Cable Hip Ad/Ab", detail: "12 reps/side @ RPE 6", dur: 45},
+    {name: "Roman Chair Back Ext", detail: "12 reps @ RPE 6 · slow", dur: 40}
+  ], 3, 30, "Hip + Spine Health"));
+  // 3*(45+8+40) + 2*30 = 279+60 = 339s
+  
+  steps.push(...transition(10));
+  
+  let used = steps.reduce((s,x) => s + x.duration, 0);
+  steps.push(...cardioBlock("Walking Pad", "6% incline · 2.5 mph — breathe easy", 1800 - used, "Cool Down"));
+  
+  DAYS.push({
+    name: "Day 3",
+    title: "Movement + Core",
+    subtitle: "Stability · Mobility · Anti-Rotation · Recovery",
+    intensity: "low",
+    steps
+  });
+})();
+
+// ============================================
+// DAY 4: HIGH — Vertical Press + Pull
+// Shoulders, lats, upper back, traps
+// ============================================
+(function(){
+  let steps = [];
+  
+  // Strength A: Barbell OHP — 4x5 @ RPE 8
+  steps.push(...straightSets("Barbell Overhead Press", "5 reps @ RPE 8", 4, 45, 70, "Heavy OHP"));
+  // 4*45 + 3*70 = 180+210 = 390s
+  
+  steps.push(...transition(10));
+  
+  // Cardio A: Stair Stepper
+  steps.push(...cardioBlock("Stair Stepper", "Hard pace · push it", 180, "Hard Climb"));
+  
+  steps.push(...transition(10));
+  
+  // Strength B: Pull-Up + DB Lateral Raise superset
+  steps.push(...superset([
+    {name: "Pull-Up", detail: "Max reps @ RPE 8 (band assist OK)", dur: 40},
+    {name: "DB Lateral Raise", detail: "12 reps @ RPE 7", dur: 30}
+  ], 3, 50, "Pull + Raise"));
+  // 3*(40+8+30) + 2*50 = 234+100 = 334s
+  
+  steps.push(...transition(10));
+  
+  // Cardio B: Med Ball Slam Intervals
+  steps.push(...intervals("Med Ball Slam", "Max effort · 8 slams", 25, "Active Rest", "Walk it off", 20, 6, "Slam Intervals"));
+  // 6*25 + 5*20 = 150+100 = 250s
+  
+  steps.push(...transition(10));
+  
+  // Strength C: Landmine Row + Band Pull-Apart
+  steps.push(...superset([
+    {name: "Landmine Row", detail: "10/side @ RPE 7", dur: 45},
+    {name: "Band Pull-Apart", detail: "15 reps", dur: 25}
+  ], 3, 35, "Row + Retraction"));
+  // 3*(45+8+25) + 2*35 = 234+70 = 304s
+  
+  steps.push(...transition(10));
+  
+  let used = steps.reduce((s,x) => s + x.duration, 0);
+  steps.push(...cardioBlock("Walking Pad", "12% incline · 3.8 mph — grind it out", 1800 - used, "Finisher"));
+  
+  DAYS.push({
+    name: "Day 4",
+    title: "Vertical Press + Pull",
+    subtitle: "Shoulders · Lats · Upper Back · Traps",
+    intensity: "high",
+    steps
+  });
+})();
+
+// ============================================
+// DAY 5: MEDIUM — Single Leg + Arms
+// Quads, hamstrings (unilateral), biceps, triceps
+// ============================================
+(function(){
+  let steps = [];
+  
+  // Strength A: Bulgarian Split Squat — 3x8/side @ RPE 7
+  steps.push(...straightSets("Bulgarian Split Squat (L)", "8 reps @ RPE 7", 3, 40, 15, "Split Squat"));
+  steps.push(...straightSets("Bulgarian Split Squat (R)", "8 reps @ RPE 7", 3, 40, 50, "Split Squat"));
+  // L: 3*40+2*15 = 150s, R: 3*40+2*50 = 220s = 370s
+  
+  steps.push(...transition(10));
+  
+  // Cardio A: Walking Pad
+  steps.push(...cardioBlock("Walking Pad", "12% incline · 3.5 mph", 180, "Incline Walk"));
+  
+  steps.push(...transition(10));
+  
+  // Strength B: Leg Extension + Leg Curl superset
+  steps.push(...superset([
+    {name: "Leg Extension", detail: "12 reps @ RPE 7", dur: 35},
+    {name: "Leg Curl", detail: "12 reps @ RPE 7", dur: 35}
+  ], 3, 40, "Quad + Ham"));
+  // 3*(35+8+35) + 2*40 = 234+80 = 314s
+  
+  steps.push(...transition(10));
+  
+  // Cardio B: Jump Rope Intervals
+  steps.push(...intervals("Jump Rope", "Fast doubles or singles", 30, "Active Rest", "Shake arms out", 15, 5, "Rope Intervals"));
+  // 5*30 + 4*15 = 150+60 = 210s
+  
+  steps.push(...transition(10));
+  
+  // Strength C: Curl + Pushdown superset
+  steps.push(...superset([
+    {name: "Cable Bicep Curl", detail: "12 reps @ RPE 7", dur: 30},
+    {name: "Cable Tricep Pushdown", detail: "12 reps @ RPE 7", dur: 30}
+  ], 3, 35, "Arms"));
+  // 3*(30+8+30) + 2*35 = 204+70 = 274s
+  
+  steps.push(...transition(10));
+  
+  let used = steps.reduce((s,x) => s + x.duration, 0);
+  steps.push(...cardioBlock("Stair Stepper", "Moderate pace — steady finish", 1800 - used, "Finisher"));
+  
+  DAYS.push({
+    name: "Day 5",
+    title: "Single Leg + Arms",
+    subtitle: "Quads · Hamstrings · Biceps · Triceps",
+    intensity: "med",
+    steps
+  });
+})();
+
+// ============================================
+// DAY 6: LOW — GPP Conditioning
+// Full body light, metabolic, movement variety
+// ============================================
+(function(){
+  let steps = [];
+  
+  // Strength A: GPP Circuit 1
+  steps.push(...circuit([
+    {name: "DB Calf Raise (Slant Board)", detail: "15 reps @ RPE 6", dur: 40},
+    {name: "KB Clean", detail: "6/side @ RPE 6", dur: 35},
+    {name: "Hanging Knee Raise", detail: "10 reps", dur: 30}
+  ], 3, 8, 40, "GPP Circuit 1"));
+  // 3*(40+8+35+8+30) + 2*40 = 363+80 = 443s
+  
+  steps.push(...transition(10));
+  
+  // Cardio A: Walking Pad
+  steps.push(...cardioBlock("Walking Pad", "10% incline · 3.0 mph", 200, "Easy Walk"));
+  
+  steps.push(...transition(10));
+  
+  // Strength B: GPP Circuit 2
+  steps.push(...circuit([
+    {name: "Band Lateral Walk", detail: "15 steps/direction @ RPE 6", dur: 40},
+    {name: "Cable Face Pull", detail: "15 reps @ RPE 6", dur: 35},
+    {name: "Plank Shoulder Tap", detail: "10/side", dur: 30}
+  ], 3, 8, 35, "GPP Circuit 2"));
+  // 3*(40+8+35+8+30) + 2*35 = 363+70 = 433s
+  
+  steps.push(...transition(10));
+  
+  // Cardio B: Mixed Intervals
+  steps.push(...circuit([
+    {name: "Jump Rope", detail: "Easy pace", dur: 30, cat: "cardio"},
+    {name: "Walking Pad", detail: "12% incline · 3.5 mph", dur: 40, cat: "cardio"}
+  ], 4, 0, 15, "Cardio Mix"));
+  // 4*(30+40) + 3*15 = 280+45 = 325s
+  
+  steps.push(...transition(10));
+  
+  let used = steps.reduce((s,x) => s + x.duration, 0);
+  steps.push(...cardioBlock("Walking Pad", "6% incline · 2.5 mph — breathe it out", 1800 - used, "Cool Down"));
+  
+  DAYS.push({
+    name: "Day 6",
+    title: "GPP Conditioning",
+    subtitle: "Full Body Light · Metabolic · Movement Variety",
+    intensity: "low",
+    steps
+  });
+})();
+
+// ============================================
+// DAY 7: MEDIUM — Carry + Core + Unilateral
+// Trunk, grip, balance, anti-flexion/rotation
+// ============================================
+(function(){
+  let steps = [];
+  
+  // Strength A: Farmer Carry + Single Leg RDL
+  steps.push(...superset([
+    {name: "DB Farmer Carry", detail: "Heavy · walk the room @ RPE 7", dur: 40},
+    {name: "Single Leg RDL (KB)", detail: "8/side @ RPE 7", dur: 50}
+  ], 3, 45, "Carry + Hinge"));
+  // 3*(40+8+50) + 2*45 = 294+90 = 384s
+  
+  steps.push(...transition(10));
+  
+  // Cardio A: Stair Stepper
+  steps.push(...cardioBlock("Stair Stepper", "Moderate-hard · push tempo", 200, "Climb"));
+  
+  steps.push(...transition(10));
+  
+  // Strength B: Cable Chop + Pallof superset
+  steps.push(...superset([
+    {name: "Cable Woodchop", detail: "10/side @ RPE 7", dur: 45},
+    {name: "Pallof Press", detail: "10/side @ RPE 7", dur: 40}
+  ], 3, 35, "Rotational Core"));
+  // 3*(45+8+40) + 2*35 = 279+70 = 349s
+  
+  steps.push(...transition(10));
+  
+  // Cardio B: Plyo Power Circuit
+  steps.push(...circuit([
+    {name: "Med Ball Slam", detail: "6 reps · max effort", dur: 20, cat: "cardio"},
+    {name: "KB Snatch", detail: "5/side · explosive", dur: 20, cat: "cardio"},
+    {name: "Plyo Inverted Row", detail: "5 reps · pull to release", dur: 20, cat: "cardio"}
+  ], 4, 5, 20, "Plyo Power"));
+  
+  steps.push(...transition(10));
+  
+  // Strength C: GHR + Slant Board
+  steps.push(...superset([
+    {name: "GHR", detail: "8 reps @ RPE 7", dur: 35},
+    {name: "DB Wrist Curl + Extension", detail: "15 reps each @ RPE 6", dur: 40}
+  ], 3, 30, "GHR + Grip"));
+  // 3*(35+8+40) + 2*30 = 249+60 = 309s
+  
+  steps.push(...transition(10));
+  
+  let used = steps.reduce((s,x) => s + x.duration, 0);
+  steps.push(...cardioBlock("Walking Pad", "10% incline · 3.0 mph — wind down", 1800 - used, "Cool Down"));
+  
+  DAYS.push({
+    name: "Day 7",
+    title: "Carry + Core + Unilateral",
+    subtitle: "Trunk · Grip · Balance · Anti-Rotation",
+    intensity: "med",
+    steps
+  });
+})();
+
+// ============================================
+// APP LOGIC
+// ============================================
+let currentDay = 0;
+let currentStep = 0;
+let stepTimeLeft = 0;
+let totalElapsed = 0;
+let isRunning = false;
+let isPaused = false;
+let intervalId = null;
+let audioCtx = null;
+let isTransitionPause = false;
+let recognition = null;
+let voiceEnabled = false;
+let voiceAvailable = false;
+
+// Audio
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function beep(freq, duration, type = 'sine') {
+  if (!audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    osc.type = type;
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duration);
+  } catch(e) {}
+}
+
+function beepTransition() { beep(880, 0.15); setTimeout(() => beep(1100, 0.2), 160); }
+function beepCountdown() { beep(660, 0.1); }
+function beepComplete() { beep(880, 0.1); setTimeout(() => beep(1100, 0.1), 120); setTimeout(() => beep(1320, 0.25), 240); }
+
+// Voice Control
+function initVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  voiceAvailable = true;
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        handleVoiceCommand(event.results[i][0].transcript.toLowerCase().trim());
+      }
+    }
+  };
+
+  recognition.onend = () => {
+    if (voiceEnabled) {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+
+  recognition.onerror = (event) => {
+    if (event.error === 'not-allowed') {
+      voiceEnabled = false;
+      updateControls();
+    } else if (voiceEnabled) {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+}
+
+function handleVoiceCommand(text) {
+  if (!text.includes('coach')) return;
+  if (text.includes('go') || text.includes('start') || text.includes('resume') || text.includes('ready')) {
+    if (isPaused && isRunning) togglePause();
+  } else if (text.includes('pause') || text.includes('stop') || text.includes('hold')) {
+    if (!isPaused && isRunning) togglePause();
+  } else if (text.includes('skip') || text.includes('next')) {
+    if (isRunning) skipStep();
+  }
+}
+
+function toggleVoice() {
+  if (!voiceAvailable) return;
+  voiceEnabled = !voiceEnabled;
+  if (voiceEnabled) {
+    try { recognition.start(); } catch(e) {}
+  } else {
+    try { recognition.stop(); } catch(e) {}
+  }
+  updateControls();
+}
+
+function stopVoice() {
+  if (recognition) { try { recognition.stop(); } catch(e) {} }
+}
+
+// Format seconds as M:SS
+function fmt(s) {
+  s = Math.max(0, Math.ceil(s));
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+// Render day selector
+function renderDaySelector() {
+  const el = document.getElementById('daySelector');
+  el.innerHTML = '';
+  DAYS.forEach((day, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (i === currentDay ? ' active' : '');
+    const color = day.intensity === 'high' ? 'var(--high)' : day.intensity === 'med' ? 'var(--med)' : 'var(--low)';
+    btn.innerHTML = `D${i+1}<span class="intensity-dot" style="background:${color}"></span>`;
+    btn.onclick = () => { if (!isRunning) selectDay(i); };
+    el.appendChild(btn);
+  });
+}
+
+function selectDay(i) {
+  currentDay = i;
+  try { localStorage.setItem('gpp_lastDay', i); } catch(e) {}
+  renderDaySelector();
+  renderDayHeader();
+  renderWorkoutList();
+  resetWorkout();
+}
+
+function renderDayHeader() {
+  const day = DAYS[currentDay];
+  document.getElementById('dayTitle').textContent = `${day.name}: ${day.title}`;
+  document.getElementById('daySubtitle').textContent = day.subtitle;
+  const badge = document.getElementById('intensityBadge');
+  badge.textContent = day.intensity === 'high' ? 'High Intensity' : day.intensity === 'med' ? 'Medium Intensity' : 'Low Intensity';
+  badge.className = 'intensity-badge intensity-' + day.intensity;
+}
+
+function renderWorkoutList() {
+  const el = document.getElementById('workoutList');
+  const steps = DAYS[currentDay].steps;
+  el.innerHTML = '';
+  
+  let lastBlock = '';
+  steps.forEach(step => {
+    if (step.block && step.block !== lastBlock && step.cat !== 'rest') {
+      lastBlock = step.block;
+      const header = document.createElement('div');
+      header.className = 'block-header';
+      header.textContent = step.block;
+      el.appendChild(header);
+    }
+    
+    const item = document.createElement('div');
+    item.className = 'step-item' + (step.cat === 'rest' ? ' is-rest' : '');
+    
+    if (step.cat === 'rest' && step.name === 'Transition' && step.duration <= 10) return; // hide tiny transitions in list
+    
+    item.innerHTML = `
+      <span class="step-dot ${step.cat}"></span>
+      <div class="step-info">
+        <div class="step-name">${step.name}</div>
+        ${step.detail ? `<div class="step-detail">${step.detail}</div>` : ''}
+      </div>
+      <div class="step-time">${fmt(step.duration)}</div>
+    `;
+    el.appendChild(item);
+  });
+}
+
+function resetWorkout() {
+  isRunning = false;
+  isPaused = false;
+  isTransitionPause = false;
+  currentStep = 0;
+  stepTimeLeft = 0;
+  totalElapsed = 0;
+  if (intervalId) { clearInterval(intervalId); intervalId = null; }
+
+  document.getElementById('workoutList').classList.remove('hidden');
+  document.getElementById('activeWorkout').classList.add('hidden');
+  document.getElementById('completeScreen').classList.add('hidden');
+
+  renderStartControls();
+}
+
+function startWorkout() {
+  initAudio();
+  isRunning = true;
+  isPaused = false;
+  currentStep = 0;
+  totalElapsed = 0;
+  
+  const steps = DAYS[currentDay].steps;
+  stepTimeLeft = steps[0].duration;
+  
+  document.getElementById('workoutList').classList.add('hidden');
+  document.getElementById('activeWorkout').classList.remove('hidden');
+  document.getElementById('completeScreen').classList.add('hidden');
+  
+  updateDisplay();
+  updateControls();
+
+  beepTransition();
+  if (voiceEnabled && recognition) { try { recognition.start(); } catch(e) {} }
+
+  intervalId = setInterval(tick, 1000);
+}
+
+function tick() {
+  if (isPaused) return;
+  
+  stepTimeLeft--;
+  totalElapsed++;
+  
+  const steps = DAYS[currentDay].steps;
+  
+  // Countdown beeps at 3, 2, 1
+  if (stepTimeLeft <= 3 && stepTimeLeft > 0) {
+    beepCountdown();
+    document.getElementById('mainTimer').classList.add('timer-flash');
+    setTimeout(() => document.getElementById('mainTimer').classList.remove('timer-flash'), 300);
+  }
+  
+  if (stepTimeLeft <= 0) {
+    currentStep++;
+    if (currentStep >= steps.length) {
+      completeWorkout();
+      return;
+    }
+
+    // Auto-pause at block transitions (setup/breakdown time)
+    const nextStep = steps[currentStep];
+    if (nextStep.name === "Transition" && nextStep.detail === "Set up next block") {
+      totalElapsed += nextStep.duration;
+      currentStep++;
+      if (currentStep >= steps.length) {
+        completeWorkout();
+        return;
+      }
+      stepTimeLeft = steps[currentStep].duration;
+      isPaused = true;
+      isTransitionPause = true;
+      updateDisplay();
+      updateControls();
+      beepTransition();
+      return;
+    }
+
+    stepTimeLeft = steps[currentStep].duration;
+    beepTransition();
+  }
+  
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const steps = DAYS[currentDay].steps;
+  const step = steps[currentStep];
+  
+  // Main timer
+  const timer = document.getElementById('mainTimer');
+  timer.textContent = fmt(stepTimeLeft);
+  timer.className = 'main-timer ' + step.cat;
+  
+  // Total timer
+  document.getElementById('totalTimer').textContent = `Total: ${fmt(1800 - totalElapsed)}`;
+  
+  // Progress
+  const fill = document.getElementById('progressFill');
+  fill.style.width = (totalElapsed / 1800 * 100) + '%';
+  const fillColor = step.cat === 'strength' ? 'var(--strength)' : step.cat === 'cardio' ? 'var(--cardio)' : 'var(--rest)';
+  fill.style.background = fillColor;
+  
+  // Exercise display
+  const display = document.getElementById('exerciseDisplay');
+
+  if (isTransitionPause) {
+    display.className = 'exercise-display transition-pause';
+    document.getElementById('exerciseLabel').textContent = 'SET UP';
+    document.getElementById('exerciseLabel').className = 'setup-label';
+    document.getElementById('exerciseName').textContent = step.name;
+    document.getElementById('exerciseDetail').textContent = step.detail || '';
+    document.getElementById('exerciseRound').textContent = voiceEnabled ? 'Say "coach, go" or tap Go' : 'Tap Go when ready';
+  } else {
+    display.className = 'exercise-display ' + step.cat + '-border';
+    const label = document.getElementById('exerciseLabel');
+    label.textContent = step.cat === 'rest' ? 'REST' : step.cat === 'cardio' ? 'CARDIO' : 'STRENGTH';
+    label.className = 'exercise-label ' + step.cat;
+    document.getElementById('exerciseName').textContent = step.name;
+    document.getElementById('exerciseDetail').textContent = step.detail || '';
+    document.getElementById('exerciseRound').textContent = step.round || '';
+  }
+  
+  // Up next
+  const upNext = document.getElementById('upNext');
+  if (currentStep < steps.length - 1) {
+    let nextWorkStep = null;
+    for (let i = currentStep + 1; i < steps.length; i++) {
+      if (steps[i].cat !== 'rest' || steps[i].duration > 15) {
+        nextWorkStep = steps[i];
+        break;
+      }
+    }
+    if (nextWorkStep) {
+      upNext.classList.remove('hidden');
+      document.getElementById('upNextName').textContent = nextWorkStep.name + (nextWorkStep.detail ? ' — ' + nextWorkStep.detail : '');
+      document.getElementById('upNextTime').textContent = fmt(nextWorkStep.duration);
+    } else {
+      upNext.classList.add('hidden');
+    }
+  } else {
+    upNext.classList.add('hidden');
+  }
+}
+
+function micButton() {
+  if (!voiceAvailable) return '';
+  const micSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>`;
+  return `<button class="voice-btn${voiceEnabled ? ' active listening' : ''}" onclick="toggleVoice()" title="Voice: say 'coach go/pause/skip'">${micSvg}</button>`;
+}
+
+function renderStartControls() {
+  document.getElementById('controls').innerHTML = `
+    <button class="ctrl-btn primary" onclick="startWorkout()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      Start Workout
+    </button>
+    ${micButton()}
+  `;
+}
+
+function updateControls() {
+  const controls = document.getElementById('controls');
+  if (!isRunning) { renderStartControls(); return; }
+
+  if (isPaused) {
+    controls.innerHTML = `
+      <button class="ctrl-btn" onclick="resetWorkout()">Reset</button>
+      <button class="ctrl-btn primary" onclick="togglePause()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        ${isTransitionPause ? 'Go' : 'Resume'}
+      </button>
+      ${micButton()}
+      <button class="ctrl-btn" onclick="skipStep()">Skip</button>
+    `;
+  } else {
+    controls.innerHTML = `
+      <button class="ctrl-btn" onclick="resetWorkout()">Reset</button>
+      <button class="ctrl-btn primary" onclick="togglePause()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        Pause
+      </button>
+      ${micButton()}
+      <button class="ctrl-btn" onclick="skipStep()">Skip</button>
+    `;
+  }
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  if (!isPaused) isTransitionPause = false;
+  updateControls();
+  updateDisplay();
+}
+
+function skipStep() {
+  const steps = DAYS[currentDay].steps;
+  totalElapsed += stepTimeLeft;
+  currentStep++;
+  if (currentStep >= steps.length) {
+    completeWorkout();
+    return;
+  }
+  stepTimeLeft = steps[currentStep].duration;
+  beepTransition();
+  updateDisplay();
+}
+
+function completeWorkout() {
+  isRunning = false;
+  stopVoice();
+  if (intervalId) { clearInterval(intervalId); intervalId = null; }
+  
+  document.getElementById('activeWorkout').classList.add('hidden');
+  document.getElementById('completeScreen').classList.remove('hidden');
+  
+  const day = DAYS[currentDay];
+  document.getElementById('completeSubtitle').textContent = `${day.name}: ${day.title} — 30 minutes done.`;
+  
+  beepComplete();
+  
+  document.getElementById('controls').innerHTML = `
+    <button class="ctrl-btn primary" onclick="nextDay()">
+      Next Day
+    </button>
+    <button class="ctrl-btn" onclick="selectDay(currentDay)">
+      Repeat
+    </button>
+  `;
+}
+
+function nextDay() {
+  currentDay = (currentDay + 1) % 7;
+  selectDay(currentDay);
+}
+
+// Init
+(function init() {
+  try { 
+    const saved = localStorage.getItem('gpp_lastDay');
+    if (saved !== null) currentDay = parseInt(saved);
+  } catch(e) {}
+  
+  // Validate all days = 1800s
+  DAYS.forEach((day, i) => {
+    const total = day.steps.reduce((s, x) => s + x.duration, 0);
+    if (total !== 1800) {
+      console.warn(`Day ${i+1} total: ${total}s (expected 1800s, diff: ${1800-total}s)`);
+    }
+  });
+  
+  initVoice();
+  renderDaySelector();
+  renderDayHeader();
+  renderWorkoutList();
+  renderStartControls();
+})();
+
+// Prevent screen sleep
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && isRunning) requestWakeLock();
+});
+const origStart = startWorkout;
+startWorkout = function() {
+  requestWakeLock();
+  origStart();
+};
+</script>
+</body>
+</html>
