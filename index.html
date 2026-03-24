@@ -528,6 +528,15 @@
   }
   .toggle-done.checked { background: rgba(34,197,94,0.12); border-color: var(--strength); color: var(--strength); }
 
+  .record-toggle-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; background: var(--bg); border-radius: 10px;
+    margin-bottom: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+  }
+  .record-toggle-row input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: var(--strength); flex-shrink: 0; cursor: pointer;
+  }
+
   .sheet-actions {
     display: flex; gap: 10px;
     padding: 12px 20px 32px; flex-shrink: 0;
@@ -688,6 +697,16 @@
     <div class="sheet-scroll" id="historySheetContent"></div>
     <div class="sheet-actions">
       <button class="sheet-btn primary" onclick="closeHistorySheet()">Close</button>
+    </div>
+  </div>
+
+  <!-- Record Results Sheet -->
+  <div class="bottom-sheet" id="recordSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-scroll" id="recordSheetContent"></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeRecordSheet()">Cancel</button>
+      <button class="sheet-btn primary" onclick="saveRecordSheet()">Save Session</button>
     </div>
   </div>
 
@@ -1324,6 +1343,12 @@ function renderWorkoutList() {
   histBtn.onclick = showSessionHistory;
   el.appendChild(histBtn);
 
+  const recBtn = document.createElement('button');
+  recBtn.className = 'history-preview-btn';
+  recBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg> Record Results';
+  recBtn.onclick = showRecordSheet;
+  el.appendChild(recBtn);
+
   let lastBlock = '';
   steps.forEach(step => {
     if (step.block && step.block !== lastBlock && step.cat !== 'rest') {
@@ -1845,6 +1870,101 @@ function showSessionHistory() {
 }
 
 function closeHistorySheet() { closeSheet('historySheet'); }
+
+// ---- Record Results Sheet ----
+
+let recordStepsData = [];
+
+function showRecordSheet() {
+  const day = DAYS[currentDay];
+  const today = new Date().toISOString().slice(0, 10);
+  recordStepsData = [];
+
+  let html = `
+    <div style="padding:20px 0 4px;font-size:18px;font-weight:700;">${day.name}: ${day.title}</div>
+    <div class="sheet-section-label">Session Date</div>
+    <input class="log-input" type="date" id="recordDateInput" value="${today}" style="margin-bottom:16px">
+  `;
+
+  let lastBlock = '';
+  day.steps.forEach(step => {
+    const logType = getLogType(step);
+    if (!logType) return;
+    const block = step.block || step.name;
+    const round = step.round || '';
+    if (block !== lastBlock) {
+      lastBlock = block;
+      html += `<div class="presession-block-header">${block}</div>`;
+    }
+    const idx = recordStepsData.length;
+    recordStepsData.push({ step, logType, block, round });
+
+    if (logType === 'text') {
+      html += `<div style="margin-bottom:10px">
+        <div class="log-exercise-round">${round ? round + ' \u00b7 ' : ''}${step.name}</div>
+        <input class="log-input" type="text" placeholder="e.g. 135 x 5..." data-ridx="${idx}" style="margin-bottom:0">
+      </div>`;
+    } else if (logType === 'machine') {
+      const p = parseWalkingPad(step.detail);
+      html += `<div style="margin-bottom:10px">
+        <div class="log-exercise-round">${round ? round + ' \u00b7 ' : ''}${step.name}</div>
+        <div class="machine-fields">
+          <div>
+            <div class="machine-field-label">Incline %</div>
+            <div class="machine-field-prescribed">Prescribed: ${p.incline}%</div>
+            <input class="log-input" type="number" step="0.5" value="${p.incline}" data-ridx="${idx}" data-field="incline" style="margin-bottom:0">
+          </div>
+          <div>
+            <div class="machine-field-label">Speed mph</div>
+            <div class="machine-field-prescribed">Prescribed: ${p.speed} mph</div>
+            <input class="log-input" type="number" step="0.1" value="${p.speed}" data-ridx="${idx}" data-field="speed" style="margin-bottom:0">
+          </div>
+        </div>
+      </div>`;
+    } else if (logType === 'toggle') {
+      html += `<label class="record-toggle-row">
+        <input type="checkbox" checked data-ridx="${idx}">
+        <span>${round ? round + ' \u00b7 ' : ''}${step.name}</span>
+      </label>`;
+    }
+  });
+
+  document.getElementById('recordSheetContent').innerHTML = html;
+  openSheet('recordSheet');
+}
+
+function closeRecordSheet() { closeSheet('recordSheet'); }
+
+function saveRecordSheet() {
+  const dateEl = document.getElementById('recordDateInput');
+  const date = dateEl ? dateEl.value : new Date().toISOString().slice(0, 10);
+  const dayName = DAYS[currentDay].name;
+  const entries = [];
+
+  recordStepsData.forEach((data, idx) => {
+    const { step, logType, block, round } = data;
+    const entry = { date, day: dayName, block, round, exerciseName: step.name, type: logType };
+    if (logType === 'text') {
+      const inp = document.querySelector(`input[data-ridx="${idx}"]:not([type="checkbox"])`);
+      const val = inp ? inp.value.trim() : '';
+      if (!val) return;
+      entry.value = val;
+    } else if (logType === 'machine') {
+      const incEl = document.querySelector(`input[data-ridx="${idx}"][data-field="incline"]`);
+      const spdEl = document.querySelector(`input[data-ridx="${idx}"][data-field="speed"]`);
+      entry.incline = incEl ? parseFloat(incEl.value) : null;
+      entry.speed = spdEl ? parseFloat(spdEl.value) : null;
+      entry.completed = true;
+    } else {
+      const cb = document.querySelector(`input[type="checkbox"][data-ridx="${idx}"]`);
+      entry.completed = cb ? cb.checked : true;
+    }
+    entries.push(entry);
+  });
+
+  if (entries.length) { workoutLog.push(...entries); saveCurrentLog(); }
+  closeRecordSheet();
+}
 
 function advanceStep() {
   const steps = DAYS[currentDay].steps;
