@@ -1886,42 +1886,57 @@ function showRecordSheet() {
     <input class="log-input" type="date" id="recordDateInput" value="${today}" style="margin-bottom:16px">
   `;
 
+  // Group loggable steps by block, deduplicating text/machine by exercise name
   let lastBlock = '';
+  const seenTextMachine = new Set(); // block+name keys already rendered
+
   day.steps.forEach(step => {
     const logType = getLogType(step);
     if (!logType) return;
     const block = step.block || step.name;
     const round = step.round || '';
+
     if (block !== lastBlock) {
       lastBlock = block;
       html += `<div class="presession-block-header">${block}</div>`;
     }
-    const idx = recordStepsData.length;
-    recordStepsData.push({ step, logType, block, round });
 
-    if (logType === 'text') {
-      html += `<div style="margin-bottom:10px">
-        <div class="log-exercise-round">${round ? round + ' \u00b7 ' : ''}${step.name}</div>
-        <input class="log-input" type="text" placeholder="e.g. 135 x 5..." data-ridx="${idx}" style="margin-bottom:0">
-      </div>`;
-    } else if (logType === 'machine') {
-      const p = parseWalkingPad(step.detail);
-      html += `<div style="margin-bottom:10px">
-        <div class="log-exercise-round">${round ? round + ' \u00b7 ' : ''}${step.name}</div>
-        <div class="machine-fields">
-          <div>
-            <div class="machine-field-label">Incline %</div>
-            <div class="machine-field-prescribed">Prescribed: ${p.incline}%</div>
-            <input class="log-input" type="number" step="0.5" value="${p.incline}" data-ridx="${idx}" data-field="incline" style="margin-bottom:0">
+    if (logType === 'text' || logType === 'machine') {
+      // One input per unique exercise per block — skip duplicates
+      const key = block + '|' + step.name;
+      if (seenTextMachine.has(key)) return;
+      seenTextMachine.add(key);
+
+      const idx = recordStepsData.length;
+      recordStepsData.push({ step, logType, block, round: '' });
+
+      if (logType === 'text') {
+        html += `<div style="margin-bottom:10px">
+          <div class="log-exercise-round">${step.name}</div>
+          <input class="log-input" type="text" placeholder="e.g. 135 x 5..." data-ridx="${idx}" style="margin-bottom:0">
+        </div>`;
+      } else {
+        const p = parseWalkingPad(step.detail);
+        html += `<div style="margin-bottom:10px">
+          <div class="log-exercise-round">${step.name}</div>
+          <div class="machine-fields">
+            <div>
+              <div class="machine-field-label">Incline %</div>
+              <div class="machine-field-prescribed">Prescribed: ${p.incline}%</div>
+              <input class="log-input" type="number" step="0.5" value="${p.incline}" data-ridx="${idx}" data-field="incline" style="margin-bottom:0">
+            </div>
+            <div>
+              <div class="machine-field-label">Speed mph</div>
+              <div class="machine-field-prescribed">Prescribed: ${p.speed} mph</div>
+              <input class="log-input" type="number" step="0.1" value="${p.speed}" data-ridx="${idx}" data-field="speed" style="margin-bottom:0">
+            </div>
           </div>
-          <div>
-            <div class="machine-field-label">Speed mph</div>
-            <div class="machine-field-prescribed">Prescribed: ${p.speed} mph</div>
-            <input class="log-input" type="number" step="0.1" value="${p.speed}" data-ridx="${idx}" data-field="speed" style="margin-bottom:0">
-          </div>
-        </div>
-      </div>`;
+        </div>`;
+      }
     } else if (logType === 'toggle') {
+      // One checkbox per interval round
+      const idx = recordStepsData.length;
+      recordStepsData.push({ step, logType, block, round });
       html += `<label class="record-toggle-row">
         <input type="checkbox" checked data-ridx="${idx}">
         <span>${round ? round + ' \u00b7 ' : ''}${step.name}</span>
