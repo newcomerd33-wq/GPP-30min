@@ -1536,15 +1536,18 @@ function togglePause() {
 function skipStep() {
   if (logPauseActive) { dismissLogSheet(false); return; }
   const steps = DAYS[currentDay].steps;
+  const step = steps[currentStep];
+  const logType = getLogType(step);
   totalElapsed += stepTimeLeft;
-  currentStep++;
-  if (currentStep >= steps.length) {
-    completeWorkout();
+  stepTimeLeft = 0;
+  if (logType) {
+    isPaused = true;
+    currentLogStep = step;
+    showLogCard(step, advanceStep);
+    updateControls();
     return;
   }
-  stepTimeLeft = steps[currentStep].duration;
-  beepTransition();
-  updateDisplay();
+  advanceStep();
 }
 
 function completeWorkout() {
