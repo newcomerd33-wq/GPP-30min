@@ -1,11 +1,114 @@
 [
   {
-    "date": "2026-03-24",
+    "date": "2026-03-23",
     "day": "Day 1",
     "block": "Heavy Squat",
-    "round": "Set 4/4",
+    "round": "",
     "exerciseName": "Barbell Back Squat",
     "type": "text",
-    "value": "155 for 3/4 Sets, Cramped in Left Groin."
+    "value": "155x5 for 3 sets, cramped and skipped 4th"
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Incline Walk",
+    "round": "",
+    "exerciseName": "Walking Pad",
+    "type": "machine",
+    "incline": 12,
+    "speed": 2.6,
+    "completed": true
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Push + Pull",
+    "round": "",
+    "exerciseName": "DB Floor Press",
+    "type": "text",
+    "value": "Pushups"
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Push + Pull",
+    "round": "",
+    "exerciseName": "Band Pull-Apart",
+    "type": "text",
+    "value": "Green Band"
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Rope Intervals",
+    "round": "Interval 1/5",
+    "exerciseName": "Jump Rope",
+    "type": "toggle",
+    "completed": true
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Rope Intervals",
+    "round": "Interval 2/5",
+    "exerciseName": "Jump Rope",
+    "type": "toggle",
+    "completed": true
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Rope Intervals",
+    "round": "Interval 3/5",
+    "exerciseName": "Jump Rope",
+    "type": "toggle",
+    "completed": true
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Rope Intervals",
+    "round": "Interval 4/5",
+    "exerciseName": "Jump Rope",
+    "type": "toggle",
+    "completed": true
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Rope Intervals",
+    "round": "Interval 5/5",
+    "exerciseName": "Jump Rope",
+    "type": "toggle",
+    "completed": true
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Squat + Push Circuit",
+    "round": "",
+    "exerciseName": "KB Goblet Squat",
+    "type": "text",
+    "value": "Bodyweight"
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Squat + Push Circuit",
+    "round": "",
+    "exerciseName": "Push-Up",
+    "type": "text",
+    "value": "Pushups"
+  },
+  {
+    "date": "2026-03-23",
+    "day": "Day 1",
+    "block": "Finisher",
+    "round": "",
+    "exerciseName": "Walking Pad",
+    "type": "machine",
+    "incline": 7,
+    "speed": 3.8,
+    "completed": true
   }
 ]
