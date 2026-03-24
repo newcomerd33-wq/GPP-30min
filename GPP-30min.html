@@ -457,6 +457,158 @@
     0%, 100% { box-shadow: 0 0 0 0 rgba(232, 232, 239, 0.3); }
     50% { box-shadow: 0 0 0 8px rgba(232, 232, 239, 0); }
   }
+
+  /* ====== LOG & HISTORY SYSTEM ====== */
+  .sheet-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 100; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .sheet-overlay.visible { opacity: 1; pointer-events: all; }
+
+  .bottom-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    height: 97vh;
+    background: var(--card);
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--card-border);
+    z-index: 101;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .bottom-sheet.visible { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 36px; height: 4px; background: var(--card-border);
+    border-radius: 2px; margin: 12px auto 4px; flex-shrink: 0;
+  }
+
+  .sheet-scroll { flex: 1; overflow-y: auto; padding: 0 20px 16px; }
+
+  .sheet-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin: 18px 0 8px;
+  }
+
+  .history-entry {
+    padding: 10px 12px; background: var(--bg);
+    border-radius: 10px; margin-bottom: 6px;
+  }
+  .history-entry-name { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px; }
+  .history-entry-value { font-size: 15px; font-weight: 600; }
+  .history-entry-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .history-empty { font-size: 14px; color: var(--text-muted); padding: 12px 0; text-align: center; }
+
+  .log-exercise-name { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+  .log-exercise-round { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+  .log-input {
+    width: 100%; padding: 14px 16px;
+    background: var(--bg); border: 1px solid var(--card-border);
+    border-radius: 12px; color: var(--text);
+    font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 500;
+    outline: none; margin-bottom: 10px; -webkit-appearance: none;
+  }
+  .log-input:focus { border-color: var(--text); }
+  .log-input::placeholder { color: var(--text-muted); }
+
+  .machine-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .machine-field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
+  .machine-field-prescribed { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+
+  .toggle-done {
+    width: 100%; padding: 18px;
+    border-radius: 12px; border: 2px solid var(--card-border);
+    background: var(--bg); color: var(--text-muted);
+    font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; margin-bottom: 10px;
+  }
+  .toggle-done.checked { background: rgba(34,197,94,0.12); border-color: var(--strength); color: var(--strength); }
+
+  .sheet-actions {
+    display: flex; gap: 10px;
+    padding: 12px 20px 32px; flex-shrink: 0;
+    border-top: 1px solid var(--card-border);
+    background: var(--card);
+  }
+  .sheet-btn {
+    flex: 1; padding: 15px; border-radius: 14px;
+    border: 1px solid var(--card-border); background: var(--card);
+    color: var(--text-muted); font-family: 'Outfit', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .sheet-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); flex: 2; }
+  .sheet-btn:active { transform: scale(0.97); }
+
+  .gear-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--card-border); background: var(--card);
+    color: var(--text-muted); display: flex; align-items: center;
+    justify-content: center; cursor: pointer; transition: all 0.2s;
+  }
+  .gear-btn svg { width: 16px; height: 16px; }
+
+  .sync-status {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 20px; padding: 8px 18px;
+    font-size: 13px; font-weight: 600; z-index: 200;
+    transition: opacity 0.3s; white-space: nowrap;
+  }
+  .sync-status.hidden { display: none; }
+  .sync-status.error { color: var(--high); border-color: rgba(239,68,68,0.3); }
+  .sync-status.ok { color: var(--strength); border-color: rgba(34,197,94,0.3); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 100%; max-width: 420px; }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.6; }
+  .modal-input {
+    width: 100%; padding: 12px 14px; background: var(--bg);
+    border: 1px solid var(--card-border); border-radius: 10px;
+    color: var(--text); font-family: 'Outfit', sans-serif; font-size: 14px;
+    outline: none; margin-bottom: 8px; -webkit-appearance: none;
+  }
+  .modal-input:focus { border-color: var(--text); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .modal-btn {
+    flex: 1; padding: 12px; border-radius: 12px;
+    border: 1px solid var(--card-border); background: var(--card);
+    color: var(--text); font-family: 'Outfit', sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .modal-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .modal-btn:active { transform: scale(0.97); }
+
+  .history-preview-btn {
+    width: 100%; padding: 11px; border: 1px solid var(--card-border);
+    border-radius: 12px; background: var(--card); color: var(--text-muted);
+    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; margin-bottom: 14px; display: flex;
+    align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .presession-block-header {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text-muted);
+    padding: 12px 0 6px; border-bottom: 1px solid var(--card-border); margin-bottom: 6px;
+  }
+  .presession-entry {
+    padding: 8px 10px; background: var(--bg); border-radius: 10px; margin-bottom: 4px;
+  }
+  .presession-entry-round { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1px; }
+  .presession-entry-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .presession-entry-value { font-size: 13px; }
+  .no-history-msg { text-align: center; padding: 32px 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+  .presession-date-header { font-size: 16px; font-weight: 700; margin: 18px 0 4px; }
+  .presession-sub-block { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 10px 0 5px; }
 </style>
 </head>
 <body>
@@ -465,10 +617,13 @@
   <div class="day-selector" id="daySelector"></div>
 
   <!-- Day Header -->
-  <div class="day-header" id="dayHeader">
+  <div class="day-header" id="dayHeader" style="position:relative;">
     <div class="day-title" id="dayTitle"></div>
     <div class="day-subtitle" id="daySubtitle"></div>
     <div class="intensity-badge" id="intensityBadge"></div>
+    <button class="gear-btn" onclick="openSettings()" style="position:absolute;top:8px;right:8px;" title="Settings">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    </button>
   </div>
 
   <!-- Controls -->
@@ -509,6 +664,46 @@
     <div class="complete-icon">&#9889;</div>
     <div class="complete-title">Done.</div>
     <div class="complete-subtitle" id="completeSubtitle">30 minutes in the books.</div>
+  </div>
+
+  <!-- Sync Status Toast -->
+  <div class="sync-status hidden" id="syncStatus"></div>
+
+  <!-- Sheet Overlay -->
+  <div class="sheet-overlay" id="sheetOverlay"></div>
+
+  <!-- Log Card Sheet -->
+  <div class="bottom-sheet" id="logSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-scroll" id="logSheetContent"></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="dismissLogSheet(false)">Skip</button>
+      <button class="sheet-btn primary" onclick="dismissLogSheet(true)">Save &amp; Continue</button>
+    </div>
+  </div>
+
+  <!-- History Sheet -->
+  <div class="bottom-sheet" id="historySheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-scroll" id="historySheetContent"></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn primary" onclick="closeHistorySheet()">Close</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal-box">
+      <div class="modal-title">GitHub Sync</div>
+      <div class="modal-desc">Enter your GitHub Personal Access Token to save workout logs to your repo. Token needs <strong>Contents: Read &amp; Write</strong> permission. Stored only on this device.</div>
+      <input class="modal-input" id="patInput" type="password" placeholder="github_pat_..." autocomplete="off">
+      <div id="patStatus" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;min-height:16px;"></div>
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="closeSettings()">Cancel</button>
+        <button class="modal-btn" onclick="clearPAT()" style="color:var(--high);">Clear</button>
+        <button class="modal-btn primary" onclick="savePAT()">Save</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -983,6 +1178,12 @@ let isTransitionPause = false;
 let recognition = null;
 let voiceEnabled = false;
 let voiceAvailable = false;
+let workoutLog = [];
+let logFileSha = null;
+let currentLogStep = null;
+let logPauseActive = false;
+let logToggleChecked = false;
+let pendingAdvance = null;
 
 // Audio
 function initAudio() {
@@ -1115,7 +1316,14 @@ function renderWorkoutList() {
   const el = document.getElementById('workoutList');
   const steps = DAYS[currentDay].steps;
   el.innerHTML = '';
-  
+
+  // Add history button
+  const histBtn = document.createElement('button');
+  histBtn.className = 'history-preview-btn';
+  histBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg> View History';
+  histBtn.onclick = showSessionHistory;
+  el.appendChild(histBtn);
+
   let lastBlock = '';
   steps.forEach(step => {
     if (step.block && step.block !== lastBlock && step.cat !== 'rest') {
@@ -1198,34 +1406,19 @@ function tick() {
   }
   
   if (stepTimeLeft <= 0) {
-    currentStep++;
-    if (currentStep >= steps.length) {
-      completeWorkout();
-      return;
-    }
-
-    // Auto-pause at block transitions (setup/breakdown time)
-    const nextStep = steps[currentStep];
-    if (nextStep.name === "Transition" && nextStep.detail === "Set up next block") {
-      totalElapsed += nextStep.duration;
-      currentStep++;
-      if (currentStep >= steps.length) {
-        completeWorkout();
-        return;
-      }
-      stepTimeLeft = steps[currentStep].duration;
+    const completedStep = steps[currentStep];
+    const logType = getLogType(completedStep);
+    if (logType) {
       isPaused = true;
-      isTransitionPause = true;
-      updateDisplay();
+      currentLogStep = completedStep;
+      showLogCard(completedStep, advanceStep);
       updateControls();
-      beepTransition();
       return;
     }
-
-    stepTimeLeft = steps[currentStep].duration;
-    beepTransition();
+    advanceStep();
+    return;
   }
-  
+
   updateDisplay();
 }
 
@@ -1333,6 +1526,7 @@ function updateControls() {
 }
 
 function togglePause() {
+  if (logPauseActive) return;
   isPaused = !isPaused;
   if (!isPaused) isTransitionPause = false;
   updateControls();
@@ -1340,6 +1534,7 @@ function togglePause() {
 }
 
 function skipStep() {
+  if (logPauseActive) { dismissLogSheet(false); return; }
   const steps = DAYS[currentDay].steps;
   totalElapsed += stepTimeLeft;
   currentStep++;
@@ -1382,11 +1577,13 @@ function nextDay() {
 
 // Init
 (function init() {
-  try { 
+  loadWorkoutLog();
+
+  try {
     const saved = localStorage.getItem('gpp_lastDay');
     if (saved !== null) currentDay = parseInt(saved);
   } catch(e) {}
-  
+
   // Validate all days = 1800s
   DAYS.forEach((day, i) => {
     const total = day.steps.reduce((s, x) => s + x.duration, 0);
@@ -1401,6 +1598,275 @@ function nextDay() {
   renderWorkoutList();
   renderStartControls();
 })();
+
+// ============================================
+// WORKOUT LOG SYSTEM
+// ============================================
+
+const REPO_OWNER = 'newcomerd33-wq';
+const REPO_NAME = 'GPP-30min';
+const LOG_FILE = 'workout-log.json';
+
+function getPAT() {
+  try { return localStorage.getItem('gpp_pat') || ''; } catch(e) { return ''; }
+}
+
+async function loadWorkoutLog() {
+  try {
+    const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${LOG_FILE}?t=${Date.now()}`;
+    const res = await fetch(url);
+    if (res.ok) workoutLog = await res.json();
+    else workoutLog = [];
+  } catch(e) { workoutLog = []; }
+  const pat = getPAT();
+  if (pat) await fetchFileSha(pat);
+}
+
+async function fetchFileSha(pat) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${LOG_FILE}`, {
+      headers: { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) { const d = await res.json(); logFileSha = d.sha; }
+    else if (res.status === 404) logFileSha = null;
+  } catch(e) {}
+}
+
+async function saveCurrentLog() {
+  const pat = getPAT();
+  if (!pat) { showSyncStatus('No token — not synced to GitHub', 'error'); return; }
+  try {
+    await fetchFileSha(pat);
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(workoutLog, null, 2))));
+    const body = { message: `Log ${new Date().toISOString().slice(0,10)}`, content };
+    if (logFileSha) body.sha = logFileSha;
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${LOG_FILE}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) { const d = await res.json(); logFileSha = d.content.sha; showSyncStatus('Saved \u2713', 'ok'); }
+    else showSyncStatus('Sync failed', 'error');
+  } catch(e) { showSyncStatus('Sync failed', 'error'); }
+}
+
+function showSyncStatus(msg, type) {
+  const el = document.getElementById('syncStatus');
+  el.textContent = msg;
+  el.className = `sync-status ${type}`;
+  setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+function openSettings() {
+  const pat = getPAT();
+  document.getElementById('patInput').value = '';
+  document.getElementById('patInput').placeholder = pat ? '(token saved — paste new to replace)' : 'github_pat_...';
+  document.getElementById('patStatus').textContent = pat ? 'Token is saved on this device.' : 'No token saved yet.';
+  document.getElementById('settingsModal').classList.remove('hidden');
+}
+function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+function savePAT() {
+  const val = document.getElementById('patInput').value.trim();
+  if (val) { try { localStorage.setItem('gpp_pat', val); } catch(e) {} fetchFileSha(val); showSyncStatus('Token saved', 'ok'); }
+  closeSettings();
+}
+function clearPAT() {
+  try { localStorage.removeItem('gpp_pat'); } catch(e) {}
+  document.getElementById('patInput').value = '';
+  document.getElementById('patStatus').textContent = 'Token cleared.';
+}
+
+function getLogType(step) {
+  if (!step || step.cat === 'rest') return null;
+  if (step.name === 'Active Rest' || step.name === 'Transition') return null;
+  if (step.cat === 'strength') return 'text';
+  if (step.name === 'Walking Pad') return 'machine';
+  if (/\d+\s*(rep|slam|\/side|snatch)/i.test(step.detail)) return 'text';
+  return 'toggle';
+}
+
+function parseWalkingPad(detail) {
+  const im = detail.match(/(\d+(?:\.\d+)?)\s*%/);
+  const sm = detail.match(/(\d+(?:\.\d+)?)\s*mph/);
+  return { incline: im ? parseFloat(im[1]) : '', speed: sm ? parseFloat(sm[1]) : '' };
+}
+
+function getLastSessionEntries(dayName, block, round) {
+  const today = new Date().toISOString().slice(0,10);
+  const relevant = workoutLog.filter(e => e.day === dayName && e.block === block && e.round === round && e.date !== today);
+  if (!relevant.length) return [];
+  const lastDate = [...new Set(relevant.map(e => e.date))].sort().reverse()[0];
+  return relevant.filter(e => e.date === lastDate);
+}
+
+function openSheet(id) {
+  document.getElementById('sheetOverlay').classList.add('visible');
+  document.getElementById(id).classList.add('visible');
+}
+function closeSheet(id) {
+  document.getElementById('sheetOverlay').classList.remove('visible');
+  document.getElementById(id).classList.remove('visible');
+}
+
+function showLogCard(completedStep, onDone) {
+  pendingAdvance = onDone;
+  logToggleChecked = false;
+  logPauseActive = true;
+
+  const day = DAYS[currentDay];
+  const block = completedStep.block || completedStep.name;
+  const round = completedStep.round || '';
+  const logType = getLogType(completedStep);
+
+  const histEntries = getLastSessionEntries(day.name, block, round);
+  let histHTML = '';
+  if (histEntries.length) {
+    const dateLabel = histEntries[0].date;
+    histHTML = histEntries.map(e => {
+      let v = '';
+      if (e.type === 'machine') v = `<span style="color:var(--cardio)">${e.incline}% \u00b7 ${e.speed} mph</span>`;
+      else if (e.type === 'toggle') v = e.completed ? `<span style="color:var(--strength)">\u2713 Done</span>` : `<span style="color:var(--text-muted)">Skipped</span>`;
+      else v = `<span>${e.value || '\u2014'}</span>`;
+      return `<div class="history-entry"><div class="history-entry-name">${e.exerciseName}</div><div class="history-entry-value">${v}</div><div class="history-entry-date">${dateLabel}</div></div>`;
+    }).join('');
+  } else {
+    histHTML = `<div class="history-empty">No history yet for this block.</div>`;
+  }
+
+  let inputHTML = '';
+  if (logType === 'text') {
+    inputHTML = `<input class="log-input" id="logTextInput" type="text" placeholder="e.g. 135 x 5, RPE 8..." autocomplete="off">`;
+  } else if (logType === 'machine') {
+    const p = parseWalkingPad(completedStep.detail);
+    inputHTML = `<div class="machine-fields">
+      <div>
+        <div class="machine-field-label">Incline %</div>
+        <div class="machine-field-prescribed">Prescribed: ${p.incline}%</div>
+        <input class="log-input" id="logInclineInput" type="number" step="0.5" value="${p.incline}" style="margin-bottom:0">
+      </div>
+      <div>
+        <div class="machine-field-label">Speed mph</div>
+        <div class="machine-field-prescribed">Prescribed: ${p.speed} mph</div>
+        <input class="log-input" id="logSpeedInput" type="number" step="0.1" value="${p.speed}" style="margin-bottom:0">
+      </div>
+    </div>`;
+  } else {
+    inputHTML = `<button class="toggle-done" id="logToggleBtn" onclick="toggleLogDone()">Tap to mark done</button>`;
+  }
+
+  document.getElementById('logSheetContent').innerHTML = `
+    <div class="sheet-section-label">Last time \u00b7 ${block}</div>
+    ${histHTML}
+    <div class="sheet-section-label">Log this set</div>
+    <div class="log-exercise-name">${completedStep.name}</div>
+    <div class="log-exercise-round">${round}${round && completedStep.detail ? ' \u00b7 ' : ''}${completedStep.detail || ''}</div>
+    ${inputHTML}
+  `;
+
+  openSheet('logSheet');
+  if (logType === 'text') setTimeout(() => { const i = document.getElementById('logTextInput'); if (i) i.focus(); }, 350);
+}
+
+function toggleLogDone() {
+  logToggleChecked = !logToggleChecked;
+  const btn = document.getElementById('logToggleBtn');
+  if (btn) { btn.textContent = logToggleChecked ? '\u2713 Done' : 'Tap to mark done'; btn.classList.toggle('checked', logToggleChecked); }
+}
+
+function dismissLogSheet(save) {
+  if (save && currentLogStep) {
+    const step = currentLogStep;
+    const logType = getLogType(step);
+    const entry = {
+      date: new Date().toISOString().slice(0,10),
+      day: DAYS[currentDay].name,
+      block: step.block || step.name,
+      round: step.round || '',
+      exerciseName: step.name,
+      type: logType
+    };
+    if (logType === 'text') {
+      const inp = document.getElementById('logTextInput');
+      entry.value = inp ? inp.value.trim() : '';
+    } else if (logType === 'machine') {
+      const inc = document.getElementById('logInclineInput');
+      const spd = document.getElementById('logSpeedInput');
+      entry.incline = inc ? parseFloat(inc.value) : null;
+      entry.speed = spd ? parseFloat(spd.value) : null;
+      entry.completed = true;
+    } else {
+      entry.completed = logToggleChecked;
+    }
+    workoutLog.push(entry);
+    saveCurrentLog();
+  }
+  closeSheet('logSheet');
+  logPauseActive = false;
+  currentLogStep = null;
+  if (pendingAdvance) { const fn = pendingAdvance; pendingAdvance = null; fn(); }
+}
+
+function showSessionHistory() {
+  const day = DAYS[currentDay];
+  const entries = workoutLog.filter(e => e.day === day.name).sort((a,b) => b.date.localeCompare(a.date));
+  const content = document.getElementById('historySheetContent');
+
+  if (!entries.length) {
+    content.innerHTML = `<div style="padding:20px 0 6px;font-size:18px;font-weight:700;">${day.name}: ${day.title}</div><div class="no-history-msg">No workout history yet.<br>Complete this day to start building your log.</div>`;
+    openSheet('historySheet');
+    return;
+  }
+
+  const dates = [...new Set(entries.map(e => e.date))].sort().reverse();
+  let html = `<div style="padding:20px 0 6px;font-size:18px;font-weight:700;">${day.name}: ${day.title}</div>`;
+
+  dates.forEach(date => {
+    const de = entries.filter(e => e.date === date);
+    html += `<div class="presession-date-header">${date}</div>`;
+    const blocks = [...new Set(de.map(e => e.block))];
+    blocks.forEach(block => {
+      const be = de.filter(e => e.block === block);
+      if (block) html += `<div class="presession-sub-block">${block}</div>`;
+      be.forEach(e => {
+        let v = '';
+        if (e.type === 'machine') v = `<span style="color:var(--cardio)">${e.incline}% \u00b7 ${e.speed} mph \u2713</span>`;
+        else if (e.type === 'toggle') v = e.completed ? `<span style="color:var(--strength)">\u2713 Done</span>` : `<span style="color:var(--text-muted)">Skipped</span>`;
+        else v = `<span>${e.value || '\u2014'}</span>`;
+        html += `<div class="presession-entry"><div class="presession-entry-round">${e.round || ''}</div><div class="presession-entry-name">${e.exerciseName}</div><div class="presession-entry-value">${v}</div></div>`;
+      });
+    });
+  });
+
+  content.innerHTML = html;
+  openSheet('historySheet');
+}
+
+function closeHistorySheet() { closeSheet('historySheet'); }
+
+function advanceStep() {
+  const steps = DAYS[currentDay].steps;
+  currentStep++;
+  if (currentStep >= steps.length) { completeWorkout(); return; }
+  const nextStep = steps[currentStep];
+  if (nextStep.name === "Transition" && nextStep.detail === "Set up next block") {
+    totalElapsed += nextStep.duration;
+    currentStep++;
+    if (currentStep >= steps.length) { completeWorkout(); return; }
+    stepTimeLeft = steps[currentStep].duration;
+    isPaused = true;
+    isTransitionPause = true;
+    updateDisplay();
+    updateControls();
+    beepTransition();
+    return;
+  }
+  stepTimeLeft = nextStep.duration;
+  isPaused = false;
+  isTransitionPause = false;
+  beepTransition();
+  updateDisplay();
+  updateControls();
+}
 
 // Prevent screen sleep
 let wakeLock = null;
